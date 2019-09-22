@@ -32,7 +32,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
- 
+#define LED0  0
+#define LED1  1
+#define ON    0
+#define OFF   1
+#define SWITCH(x)       (~(x) & 0x1)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,7 +46,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+uint8_t led_value[2] = {OFF, OFF};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,7 +56,33 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/**
+  * @brief  control led light on or light off
+  * @retval int
+  */
+int led_control(uint8_t num, uint8_t status)
+{
+  if(num != LED0 && num != LED1)
+  {
+    return -1;
+  }
 
+  if(status != ON && status != OFF)
+  {
+    return -1;
+  }
+
+  if (num == LED0)
+  {
+    HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, status);
+  }
+  else if (num == LED1)
+  {
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, status);
+  }
+
+  return 0;
+}
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -204,9 +234,16 @@ void SysTick_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
-
+  // KEY_UP 按下
+  if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_0) != 0x00u)
+  {
+    led_value[0] = SWITCH(led_value[0]);
+    led_value[1] = SWITCH(led_value[1]);
+    led_control(LED0, led_value[0]);
+    led_control(LED1, led_value[1]);
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0);
+  }
   /* USER CODE END EXTI0_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
 
   /* USER CODE END EXTI0_IRQn 1 */
@@ -218,9 +255,14 @@ void EXTI0_IRQHandler(void)
 void EXTI1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI1_IRQn 0 */
-
+  // KEY0 按下
+  if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_1) != 0x00u)
+  {
+    led_value[0] = SWITCH(led_value[0]);
+    led_control(LED0, led_value[0]);
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
+  }
   /* USER CODE END EXTI1_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
 
   /* USER CODE END EXTI1_IRQn 1 */
@@ -232,9 +274,14 @@ void EXTI1_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-
+  // KEY1 按下
+  if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_13) != 0x00u)
+  {
+    led_value[1] = SWITCH(led_value[1]);
+    led_control(LED1, led_value[1]);
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_13);
+  }
   /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
